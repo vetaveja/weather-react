@@ -1,59 +1,72 @@
 import React, { useState } from "react";
+import WeatherInfo from "./WeatherInfo";
+import WeatherForecast from "./WeatherForecast";
 import axios from "axios";
 
-export default function Weather() {
-  let [query, setQuery] = useState("");
-  const [loaded, setLoaded] = useState(false);
-  const [weather, setWeather] = useState({});
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    let url = `https://api.shecodes.io/weather/v1/current?query=${query}&key=4f0e069tba9bdef6f3505aa3023cc7o5`;
-    axios.get(url).then(handleResponse);
-  }
-
-  function updateQuery(event) {
-    setQuery(event.target.value);
-  }
+export default function Weather(props) {
+  const [weatherData, setWeatherData] = useState({ ready: false });
+  const [city, setCity] = useState(props.defaultCity);
+ 
 
   function handleResponse(response) {
-    setLoaded(true);
-    setWeather({
+    setWeatherData({
+      ready: true,
+      coordinates: response.data.coordinates,
       temperature: response.data.temperature.current,
-      wind: response.data.wind.speed,
       humidity: response.data.temperature.humidity,
+      date: new Date(response.data.time * 1000),
+      description: response.data.condition.description,
       icon: response.data.condition.icon_url,
-      description: response.data.condition.description
+      wind: response.data.wind.speed,
+      city: response.data.city,
     });
   }
 
-  let form = (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="search"
-        placeholder="Enter a city..."
-        onChange={updateQuery}
-      />
-      <button type="submit">Submit</button>
-    </form>
-  );
+  function handleSubmit(event) {
+    event.preventDefault();
+    search();
+  }
 
-  if (loaded) {
+  function handleCityChange(event) {
+    setCity(event.target.value);
+  }
+
+  function search() {
+    const apiKey = "4f0e069tba9bdef6f3505aa3023cc7o5";
+    let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
+    axios.get(apiUrl).then(handleResponse);
+    console.log(apiUrl);
+  }
+
+  if (weatherData.ready) {
     return (
       <div className="Weather">
-        {form}
-        <ul>
-          <li>Temperature: {Math.round(weather.temperature)}°C</li>
-          <li>Description: {weather.description}</li>
-          <li>Humidity: {weather.humidity}%</li>
-          <li>Wind: {weather.wind}km/h</li>
-          <li>
-            <img src={weather.icon} alt={weather.description} />
-          </li>
-        </ul>
+        <form onSubmit={handleSubmit}>
+          <div className="row">
+            <div className="col-9">
+              <input
+                type="search"
+                placeholder="Enter a city.."
+                className="form-control"
+                autoFocus="on"
+                onChange={handleCityChange}
+              />
+            </div>
+            <div className="col-3">
+              <input
+                type="submit"
+                value="Search"
+                className="btn btn-primary w-100"
+              />
+            </div>
+          </div>
+        </form>
+        <WeatherInfo data={weatherData} />
+        <WeatherForecast coordinates={weatherData.coordinates} /> 
       </div>
     );
   } else {
-    return form;
+    search();
+    return "Loading...";
   }
 }

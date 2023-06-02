@@ -13,12 +13,11 @@ const root = createRoot(rootElement);
 root.render(
   <StrictMode>
     <div className="container">
-    <h1>Weather App</h1>
 
-    <Weather />
+    <Weather defaultCity="Lisbon"/>
     <br/>
-    <a className="btn btn-primary" href="/">Hello</a>
-    <a href="https://github.com/vetaveja/weather-react">Open-sourced ptoject</a> made by Lisa Zelena.
+  
+    <footer className="text-center"><a href="https://github.com/vetaveja/weather-react">Open-sourced ptoject</a> made by Lisa Zelena.</footer>
     </div>
   </StrictMode>
 );
